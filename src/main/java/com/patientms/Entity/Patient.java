@@ -63,7 +63,7 @@ public class Patient {
     private LocalDateTime updatedAt;
 
     // Relationships
-    private List<Integer> medicalRecordsIds = new ArrayList<>();
+    private List<Long> medicalRecordsIds = new ArrayList<>();
 
 
     @PrePersist

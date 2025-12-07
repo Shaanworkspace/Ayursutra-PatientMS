@@ -1,6 +1,7 @@
 package com.patientms.Service;
 
 import com.patientms.DTO.Request.MedicalRecordRequestDTO;
+import com.patientms.DTO.Request.RegisterRequestDTO;
 import com.patientms.DTO.Response.PatientResponseDTO;
 import com.patientms.Entity.Patient;
 import com.patientms.Repository.PatientRepository;
@@ -26,21 +27,27 @@ public class PatientService {
 
 
 
-    public Patient registerPatient(Patient patient) {
-        // Check if email already exists
-        if (patientRepository.findByEmail(patient.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Patient with this email already exists");
+    public PatientResponseDTO registerPatient(RegisterRequestDTO registerRequest) {
+        if(patientRepository.existsByEmail(registerRequest.getEmail())){
+            Patient existingPatient = patientRepository.getByEmail(registerRequest.getEmail());
+            return patientToDto(existingPatient);
         }
-
-        // Let timestamps be handled by entity @PrePersist
-        return patientRepository.save(patient);
+        Patient patient = Patient.builder()
+                .firstName(registerRequest.getFirstName())
+                .lastName(registerRequest.getLastName())
+                .email(registerRequest.getEmail())
+                .password(registerRequest.getPassword())
+                .keycloakUserId(registerRequest.getKeyClockUserId())
+                .build();
+        patientRepository.save(patient);
+        return patientToDto(patient);
     }
 
 
     public PatientResponseDTO patientToDto(Patient patient) {
                 return new PatientResponseDTO(
-                patient.getId(), patient.getFirstName() +" "+ patient.getLastName()
-                ,patient.getGender(),patient.getEmail(), patient.getPhoneNumber(), patient.getMedicalRecordsIds()
+                patient.getId(),patient.getKeycloakUserId(), patient.getFirstName() +" "+ patient.getLastName()
+                ,patient.getGender(), patient.getPhoneNumber(), null
         );
     }
 
@@ -65,11 +72,6 @@ public class PatientService {
         patientRepository.deleteById(id);
     }
 
-    // Get patient by email (for login / lookup)
-    public Patient getPatientByEmail(String email) {
-        return patientRepository.findByEmail(email).orElse(null);
-    }
-
     // Get patient by phone number
     public Patient getPatientByPhone(String phoneNumber) {
         return patientRepository.findByPhoneNumber(phoneNumber).orElse(null);
@@ -88,18 +90,19 @@ public class PatientService {
 
     /** Book an appointment and create medical record */
     public PatientResponseDTO addMedicalRecord(Long patientId, MedicalRecordRequestDTO medicalRecordRequestDTO){
-        Patient patient = patientRepository.findById(patientId).orElseThrow(()-> new IllegalArgumentException("Patient not found with ID: " + patientId));
-        medicalRecordRequestDTO.setPatientId(patientId);
-
-        Long newRecordId = restTemplate.postForObject(medicalRecordServiceUrl, medicalRecordRequestDTO, Long.class);
-
-        if (patient.getMedicalRecordsIds() == null)
-            patient.setMedicalRecordsIds(new ArrayList<>());
-
-        patient.getMedicalRecordsIds().add(newRecordId);
-        patientRepository.save(patient);
-
-        return patientToDto(patient);
+//        Patient patient = patientRepository.findById(patientId).orElseThrow(()-> new IllegalArgumentException("Patient not found with ID: " + patientId));
+//        medicalRecordRequestDTO.setPatientId(patientId);
+//
+//        Long newRecordId = restTemplate.postForObject(medicalRecordServiceUrl, medicalRecordRequestDTO, Long.class);
+//
+//        if (patient.getMedicalRecordsIds() == null)
+//            patient.setMedicalRecordsIds(new ArrayList<>());
+//
+//        patient.getMedicalRecordsIds().add(newRecordId);
+//        patientRepository.save(patient);
+//
+//        return patientToDto(patient);
+        return null;
     }
 
 }

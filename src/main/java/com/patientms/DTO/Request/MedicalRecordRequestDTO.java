@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class MedicalRecordRequestDTO {
 
     private Long patientId;              // ID of the patient booking the appointment
+    private String keycloakUserId;
     private Long doctorId;               // ID of the doctor being booked
 
     private LocalDateTime visitDate;     // Preferred appointment date & time

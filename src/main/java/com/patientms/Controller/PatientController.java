@@ -1,6 +1,7 @@
 package com.patientms.Controller;
 
 import com.patientms.DTO.Request.MedicalRecordRequestDTO;
+import com.patientms.DTO.Request.RegisterRequestDTO;
 import com.patientms.DTO.Response.PatientResponseDTO;
 import com.patientms.Entity.Patient;
 import com.patientms.Service.PatientService;
@@ -36,12 +37,6 @@ public class PatientController {
         return ResponseEntity.ok(patientService.getPatientById(id));
     }
 
-    /** Get patient by email */
-    @GetMapping("/email/{email}")
-    public Patient getPatientByEmail(@PathVariable String email) {
-        return patientService.getPatientByEmail(email);
-    }
-
     /** Get patient by phone */
     @GetMapping("/phone/{phone}")
     public Patient getPatientByPhone(@PathVariable String phone) {
@@ -69,9 +64,9 @@ public class PatientController {
 
     /** Register a new patient */
     @PostMapping
-    public ResponseEntity<?> createPatient(@RequestBody Patient patient) {
+    public ResponseEntity<?> createPatient(@RequestBody RegisterRequestDTO patient) {
         try {
-            Patient savedPatient = patientService.registerPatient(patient);
+            PatientResponseDTO savedPatient = patientService.registerPatient(patient);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedPatient);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());

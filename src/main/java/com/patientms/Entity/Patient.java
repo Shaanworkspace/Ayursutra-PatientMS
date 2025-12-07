@@ -1,18 +1,11 @@
 package com.patientms.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id"
-)
 @Entity
 @Table(name = "patients")
 @NoArgsConstructor
@@ -25,45 +18,27 @@ public class Patient {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String keycloakUserId;
+
     // Basic Profile
-    @Column(nullable = false, length = 50)
     private String firstName;
-
-    private Integer age=5;
-
-    @Column(nullable = false, length = 50)
     private String lastName;
-
-    @Column(length = 10)
-    private String gender; // Male, Female, Other
-
+    private Integer age;
+    private String gender;
     private LocalDate dateOfBirth;
+    private String bloodGroup;
 
-    @Column(length = 5)
-    private String bloodGroup; // A+, O-, etc.
-
-    // Contact Information
-    @Column(unique = true, nullable = false, length = 120)
-    private String email;
-
-    @Column(length = 15)
+    // Contact (optional profile info, not for login)
     private String phoneNumber;
-
-    @Column(length = 255)
     private String address;
-
     private String emergencyContact;
 
-    // Authentication (hashed in real application)
-    @Column(nullable = false)
+    // Only to check : Password,  Email stored for login , Not Mandatory
     private String password;
+    private String email;
 
-    // Timestamps
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    // Relationships
-    private List<Long> medicalRecordsIds = new ArrayList<>();
 
 
     @PrePersist

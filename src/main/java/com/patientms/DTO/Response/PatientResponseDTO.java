@@ -12,9 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 public class PatientResponseDTO {
     private Long id;
+    private String keycloakUserId;
     private String name;
     private String gender;
-    private String email;
     private String phoneNumber;
     private List<Long> medicalRecordIds;
 }

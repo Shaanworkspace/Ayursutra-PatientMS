@@ -29,4 +29,12 @@ public class RabbitMQConfiguration {
         restTemplate.setMessageConverter(jsonMessageConverter());
         return restTemplate;
     }
+
+
+    public static final String USER_CREATED_QUEUE = "user.created";
+
+    @Bean
+    public Queue userCreatedQueue() {
+        return new Queue(USER_CREATED_QUEUE, true); // durable queue
+    }
 }

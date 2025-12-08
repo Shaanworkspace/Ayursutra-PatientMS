@@ -12,7 +12,8 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     List<Patient> findByBloodGroup(String bloodGroup);
 
     Boolean existsByEmail(String mail);
-    Optional<Patient> findByKeycloakUserId(String keycloakUserId);
-
     Patient getByEmail(String email);
+
+    Optional<Patient> findByKeycloakUserId(String keycloakUserId);
+    boolean existsByKeycloakUserId(String keycloakUserId);
 }

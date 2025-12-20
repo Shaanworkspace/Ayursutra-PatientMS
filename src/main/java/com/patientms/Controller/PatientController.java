@@ -5,6 +5,7 @@ import com.patientms.DTO.Request.RegisterRequestDTO;
 import com.patientms.DTO.Response.PatientResponseDTO;
 import com.patientms.Entity.Patient;
 import com.patientms.Service.PatientService;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

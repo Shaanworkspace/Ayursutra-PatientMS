@@ -6,11 +6,7 @@ import com.patientms.DTO.Response.PatientResponseDTO;
 import com.patientms.Entity.Patient;
 import com.patientms.Repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,13 +15,6 @@ import java.util.stream.Collectors;
 public class PatientService {
 
     private final PatientRepository patientRepository;
-    private final RestTemplate restTemplate;
-
-
-    @Value("${medicalrecord.service.url}")
-    private String medicalRecordServiceUrl;
-
-
 
     public PatientResponseDTO registerPatient(RegisterRequestDTO registerRequest) {
         if(patientRepository.existsByEmail(registerRequest.getEmail())){

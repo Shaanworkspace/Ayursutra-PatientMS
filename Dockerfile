@@ -1,37 +1,11 @@
-# Use official Java 21 JDK image
-FROM eclipse-temurin:21-jdk AS build
-
-# Set working directory
+FROM maven:3.9.9-eclipse-temurin-17 AS builder
+LABEL authors="shaan"
 WORKDIR /app
+COPY . .
+RUN mvn -B clean package -DskipTests
 
-# Copy Maven wrapper and pom
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-
-# Give execute permission to mvnw
-RUN chmod +x mvnw
-
-# Download dependencies (offline build)
-RUN ./mvnw dependency:go-offline -B
-
-# Copy source code
-COPY src src
-
-# Package app (skip tests for faster build)
-RUN ./mvnw clean package -DskipTests
-
-
-# --------- Runtime Image ---------
-FROM eclipse-temurin:21-jdk
-
+FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
-
-# Copy the JAR from build stage
-COPY --from=build /app/target/*.jar app.jar
-
-# Expose default Spring Boot port
-EXPOSE 8080
-
-# Run Spring Boot JAR
-ENTRYPOINT ["java", "-jar", "app.jar"]
+COPY --from=builder /app/target/*.jar app.jar
+EXPOSE 8082
+ENTRYPOINT ["java","-jar","app.jar"]

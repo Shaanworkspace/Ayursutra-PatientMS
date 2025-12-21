@@ -26,7 +26,10 @@ public class MedicalRecordController {
     // ======================================
     //              GET METHODS
     // ======================================
-
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("PATIENT SERVICE UP");
+    }
     /** Get all records */
     @GetMapping
     public ResponseEntity<List<MedicalRecordResponseDTO>> getAllRecords() {

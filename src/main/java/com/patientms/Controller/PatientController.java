@@ -25,7 +25,10 @@ public class PatientController {
     // ======================================
     //               GET METHODS
     // ======================================
-
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("PATIENT SERVICE UP");
+    }
     /** Get all patients */
     @GetMapping
     public ResponseEntity<List<PatientResponseDTO>> getAllPatients() {

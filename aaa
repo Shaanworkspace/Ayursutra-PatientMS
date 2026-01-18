@@ -1,0 +1,29 @@
+# ===============================
+# = Environment Variables
+# ===============================
+
+# --- Server Configuration ---
+PORT=8082
+
+# --- Local MySQL Database ---
+DB_URL=jdbc:mysql://localhost:3306/ayursutraMicroservices-patient?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+DB_USERNAME=root
+DB_PASSWORD=1234
+
+# --- Eureka Service Registry ---
+EUREKA_SERVER_URL=http://localhost:8761/eureka/
+
+# --- RabbitMQ (Docker container) ---
+RABBITMQ_USER=xxdyrbyp
+RABBITMQ_PASS=sMZm3gic-y-AkLzdZ-GznO_6oQOb4XSx
+JWKS_URL=http://localhost:8180/realms/ayursutra-realm/protocol/openid-connect/certs
+RABBITMQ_HOST=puffin.rmq2.cloudamqp.com
+RABBITMQ_PORT=5671
+RABBITMQ_USERNAME=xxdyrbyp
+RABBITMQ_PASSWORD=sMZm3gic-y-AkLzdZ-GznO_6oQOb4XSx
+RABBITMQ_VHOST=xxdyrbyp
+
+
+AUTH0_DOMAIN=dev-vot8ozkku4yvlaqo.us.auth0.com
+
+jwt.secretkeyENV = asdfkljhasfhkdjlashfjksdkfhioqwteiruncvzxmiye

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class RegisterRequestDTO {
+    private String userId;
     private String firstName;
     private String lastName;
 
@@ -22,5 +23,4 @@ public class RegisterRequestDTO {
     @NotBlank(message = "Password Required")
     @Size(min=2,message = "Invalid Password")
     private String password;
-    private String keyClockUserId;
 }

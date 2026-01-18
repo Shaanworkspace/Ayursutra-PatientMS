@@ -13,14 +13,9 @@ import java.time.LocalDateTime;
 @Builder
 @Data
 public class Patient {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String userId;
 
-    private String keycloakUserId;
-
-    // Basic Profile
     private String firstName;
     private String lastName;
     private Integer age;
@@ -39,6 +34,22 @@ public class Patient {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private Integer completedSessions;
+    private Integer upcomingSessions;
+    private Integer healthReportsCount;
+    private Double wellnessScore;
+
+
+    //Emergency
+    private String emergencyName;
+    private String emergencyRelation;
+    private String emergencyPhone;
+
+
+    //Body
+    private Integer height;
+    private Double weight;
 
 
     @PrePersist

@@ -11,8 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PatientResponseDTO {
-    private Long id;
-    private String keycloakUserId;
+    private String userId;
     private String name;
     private String gender;
     private String phoneNumber;

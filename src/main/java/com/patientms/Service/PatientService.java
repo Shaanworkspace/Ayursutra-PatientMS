@@ -22,11 +22,11 @@ public class PatientService {
             return patientToDto(existingPatient);
         }
         Patient patient = Patient.builder()
+                .userId(registerRequest.getUserId())
                 .firstName(registerRequest.getFirstName())
                 .lastName(registerRequest.getLastName())
                 .email(registerRequest.getEmail())
                 .password(registerRequest.getPassword())
-                .keycloakUserId(registerRequest.getKeyClockUserId())
                 .build();
         patientRepository.save(patient);
         return patientToDto(patient);
@@ -35,17 +35,15 @@ public class PatientService {
 
     public PatientResponseDTO patientToDto(Patient patient) {
                 return new PatientResponseDTO(
-                patient.getId(),patient.getKeycloakUserId(), patient.getFirstName() +" "+ patient.getLastName()
+                patient.getUserId(), patient.getFirstName() +" "+ patient.getLastName()
                 ,patient.getGender(), patient.getPhoneNumber(), null
         );
     }
 
     // Get patient by ID
-    public PatientResponseDTO getPatientById(Long id) {
-        Patient patient = patientRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Patient not found with id: " + id));
-
-        return patientToDto(patient);
+    public Patient getPatientById(String id) {
+	    return patientRepository.findById(id)
+	            .orElseThrow(() -> new IllegalArgumentException("Patient not found with id: " + id));
     }
 
     //  Get all patients with mapped DTOs
@@ -57,7 +55,7 @@ public class PatientService {
 
 
     //Delete patient
-    public void deletePatient(Long id) {
+    public void deletePatient(String id) {
         patientRepository.deleteById(id);
     }
 
@@ -94,4 +92,7 @@ public class PatientService {
         return null;
     }
 
+    public Patient getPatientByEmail(String email) {
+        return patientRepository.findByEmail(email).orElse(null);
+    }
 }

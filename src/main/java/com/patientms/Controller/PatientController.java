@@ -4,14 +4,17 @@ import com.patientms.DTO.Request.MedicalRecordRequestDTO;
 import com.patientms.DTO.Request.RegisterRequestDTO;
 import com.patientms.DTO.Response.PatientResponseDTO;
 import com.patientms.Entity.Patient;
+import com.patientms.Repository.PatientRepository;
 import com.patientms.Service.PatientService;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 
 @RestController
@@ -21,6 +24,7 @@ public class PatientController {
 
     private final PatientService patientService;
     private final RestTemplate restTemplate;
+    private final PatientRepository patientRepository;
 
     // ======================================
     //               GET METHODS
@@ -37,14 +41,35 @@ public class PatientController {
 
     /** Get patient by ID */
     @GetMapping("/{id}")
-    public ResponseEntity<PatientResponseDTO> getPatientById(@PathVariable Long id) {
+    public ResponseEntity<Patient> getPatientById(@PathVariable String id) {
         return ResponseEntity.ok(patientService.getPatientById(id));
     }
+    @GetMapping("/profile/me")
+    public Patient getMyProfile(Authentication authentication) {
+
+        // JWT filter me principle me userId hota h
+        String userId = (String) authentication.getPrincipal();
+
+
+        return patientRepository.findById(userId)
+                .orElseThrow(() ->
+                        new RuntimeException("Patient not found for userId: " + userId)
+                );
+    }
+
 
     /** Get patient by phone */
     @GetMapping("/phone/{phone}")
     public Patient getPatientByPhone(@PathVariable String phone) {
         return patientService.getPatientByPhone(phone);
+    }
+    @GetMapping("/email/{email}")
+    public Patient getPatientByEmail(@PathVariable String email) {
+        return patientService.getPatientByEmail(email);
+    }
+    @GetMapping("/emailCheck/{email}")
+    public Boolean checkPatientByEmail(@PathVariable String email) {
+        return patientRepository.existsByEmail(email);
     }
 
     /** Search patients by name (first or last) */
@@ -103,7 +128,7 @@ public class PatientController {
 
     /** Delete patient by ID */
     @DeleteMapping("/{id}")
-    public void deletePatient(@PathVariable Long id) {
+    public void deletePatient(@PathVariable String id) {
         patientService.deletePatient(id);
     }
 }

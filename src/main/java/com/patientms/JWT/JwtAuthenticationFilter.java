@@ -1,6 +1,5 @@
-package com.patientms.JWT.Filter;
+package com.patientms.JWT;
 
-import com.patientms.JWT.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +21,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtUtil jwtUtil;
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		log.info("Incoming to Patient :",request.getRequestURI());
+		log.info("Incoming to Patient :{}",request.getRequestURI());
 
 		final String requestHeader = request.getHeader("Authorization");
 		if(requestHeader==null || !requestHeader.startsWith("Bearer ")){

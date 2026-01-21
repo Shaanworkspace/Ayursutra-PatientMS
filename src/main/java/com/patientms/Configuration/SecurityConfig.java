@@ -1,6 +1,6 @@
 package com.patientms.Configuration;
 
-import com.patientms.JWT.Filter.JwtAuthenticationFilter;
+import com.patientms.JWT.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

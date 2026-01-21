@@ -16,8 +16,6 @@ public class Patient {
     @Id
     private String userId;
 
-    private String firstName;
-    private String lastName;
     private Integer age;
     private String gender;
     private LocalDate dateOfBirth;
@@ -30,7 +28,6 @@ public class Patient {
 
     // Only to check : Password,  Email stored for login , Not Mandatory
     private String password;
-    private String email;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

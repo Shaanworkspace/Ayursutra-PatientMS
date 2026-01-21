@@ -17,15 +17,12 @@ public class PatientService {
     private final PatientRepository patientRepository;
 
     public PatientResponseDTO registerPatient(RegisterRequestDTO registerRequest) {
-        if(patientRepository.existsByEmail(registerRequest.getEmail())){
-            Patient existingPatient = patientRepository.getByEmail(registerRequest.getEmail());
+        if(patientRepository.existsByUserId((registerRequest.getUserId()))){
+            Patient existingPatient = patientRepository.findByUserId(registerRequest.getUserId());
             return patientToDto(existingPatient);
         }
         Patient patient = Patient.builder()
                 .userId(registerRequest.getUserId())
-                .firstName(registerRequest.getFirstName())
-                .lastName(registerRequest.getLastName())
-                .email(registerRequest.getEmail())
                 .password(registerRequest.getPassword())
                 .build();
         patientRepository.save(patient);
@@ -35,15 +32,14 @@ public class PatientService {
 
     public PatientResponseDTO patientToDto(Patient patient) {
                 return new PatientResponseDTO(
-                patient.getUserId(), patient.getFirstName() +" "+ patient.getLastName()
+                patient.getUserId()
                 ,patient.getGender(), patient.getPhoneNumber(), null
         );
     }
 
     // Get patient by ID
-    public Patient getPatientById(String id) {
-	    return patientRepository.findById(id)
-	            .orElseThrow(() -> new IllegalArgumentException("Patient not found with id: " + id));
+    public Patient getPatientByUserId(String id) {
+	    return patientRepository.findByUserId(id);
     }
 
     //  Get all patients with mapped DTOs
@@ -62,11 +58,6 @@ public class PatientService {
     // Get patient by phone number
     public Patient getPatientByPhone(String phoneNumber) {
         return patientRepository.findByPhoneNumber(phoneNumber).orElse(null);
-    }
-
-    //  Search patients by first or last name (case-insensitive)
-    public List<Patient> searchPatientsByName(String name) {
-        return patientRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name);
     }
 
     // Filter patients by blood group
@@ -92,7 +83,4 @@ public class PatientService {
         return null;
     }
 
-    public Patient getPatientByEmail(String email) {
-        return patientRepository.findByEmail(email).orElse(null);
-    }
 }

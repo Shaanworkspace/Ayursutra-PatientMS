@@ -12,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 public class PatientResponseDTO {
     private String userId;
-    private String name;
     private String gender;
     private String phoneNumber;
     private List<Long> medicalRecordIds;

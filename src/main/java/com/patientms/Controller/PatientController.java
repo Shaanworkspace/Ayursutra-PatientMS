@@ -40,9 +40,9 @@ public class PatientController {
     }
 
     /** Get patient by ID */
-    @GetMapping("/{id}")
+    @GetMapping("/check/{id}")
     public ResponseEntity<Patient> getPatientById(@PathVariable String id) {
-        return ResponseEntity.ok(patientService.getPatientById(id));
+        return ResponseEntity.ok(patientService.getPatientByUserId(id));
     }
     @GetMapping("/profile/me")
     public Patient getMyProfile(Authentication authentication) {
@@ -63,20 +63,8 @@ public class PatientController {
     public Patient getPatientByPhone(@PathVariable String phone) {
         return patientService.getPatientByPhone(phone);
     }
-    @GetMapping("/email/{email}")
-    public Patient getPatientByEmail(@PathVariable String email) {
-        return patientService.getPatientByEmail(email);
-    }
-    @GetMapping("/emailCheck/{email}")
-    public Boolean checkPatientByEmail(@PathVariable String email) {
-        return patientRepository.existsByEmail(email);
-    }
 
-    /** Search patients by name (first or last) */
-    @GetMapping("/search")
-    public List<Patient> searchPatientsByName(@RequestParam String name) {
-        return patientService.searchPatientsByName(name);
-    }
+
 
     /** Get patients by blood group */
     @GetMapping("/blood-group/{bloodGroup}")
@@ -101,9 +89,6 @@ public class PatientController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
-
-
-
 
 
 

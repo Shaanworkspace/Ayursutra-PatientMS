@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class TherapyUpdateRequest {
     private boolean needTherapy;
-    private List<Long> therapyIds;
+    private List<String> therapyIds;
 }

@@ -15,11 +15,12 @@ import java.time.LocalDateTime;
 public class MedicalRecordRequestDTO {
     private String patientId;              // ID of the patient booking the appointment
     private String doctorId;               // ID of the doctor being booked
-
+    private String therapistId;
+    private String prescribedTreatment;
     private LocalDate visitDate;     // Preferred appointment date & time
     private String symptoms;             // Description of symptoms or reason for visit
     private String allergies;            // Known allergies (if any)
-    private String medicalHistoryNotes;  // Relevant past medical history
     private String medications;          // Current medications being taken
     private String followUpRequired;     // Yes/No/Maybe - if patient needs follow-up
+    private boolean needTherapy;
 }

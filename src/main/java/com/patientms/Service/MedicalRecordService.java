@@ -1,6 +1,9 @@
 package com.patientms.Service;
 
-import com.patientms.DTO.Request.MedicalRecordRequestDTO;import com.patientms.DTO.Response.MedicalRecordResponseDTO;
+import com.patientms.Client.DoctorClient;
+import com.patientms.DTO.Request.MedicalRecordRequestDTO;
+import com.patientms.DTO.Request.MedicalRecordTransfer;
+import com.patientms.DTO.Response.MedicalRecordResponseDTO;
 import com.patientms.Entity.MedicalRecord;
 import com.patientms.Entity.Patient;
 import com.patientms.Repository.MedicalRecordRepository;
@@ -20,12 +23,13 @@ public class MedicalRecordService {
 
     private final MedicalRecordRepository medicalRecordRepository;
     private final PatientRepository patientRepository;
-
+    private final DoctorClient doctorClient;
+    private MedicalRecord record;
 
 
     // Update therapy requirements
     @Transactional
-    public MedicalRecord updateTherapies(Long recordId, boolean needTherapy, List<Long> therapyIds) {
+    public MedicalRecord updateTherapies(String recordId, boolean needTherapy, List<String> therapyIds) {
         MedicalRecord record = medicalRecordRepository.findById(recordId)
                 .orElseThrow(() -> new IllegalArgumentException("Medical Record not found with id " + recordId));
 
@@ -42,9 +46,8 @@ public class MedicalRecordService {
     }
 
     // Get record by ID (converted to DTO)
-    public MedicalRecordResponseDTO getMedicalRecordById(Long recordId) {
-        MedicalRecord record = medicalRecordRepository.findById(recordId)
-                .orElseThrow(() -> new IllegalArgumentException("Medical Record not found with ID: " + recordId));
+    public MedicalRecordResponseDTO getMedicalRecordById(String recordId) {
+        MedicalRecord record = medicalRecordRepository.findByMedicalRecordId(recordId);
         return medicalRecordConvertToMedicalRecordResponseDTO(record);
     }
 
@@ -69,7 +72,8 @@ public class MedicalRecordService {
     ) {
 
         return MedicalRecordResponseDTO.builder()
-                .id(record.getId())
+                .medicalRecordId(record.getMedicalRecordId())
+                .patientName(record.getPatient().getName())
                 .patientId(record.getPatient().getUserId())
                 .doctorId(record.getDoctorId())
                 .therapistId(record.getTherapistId())
@@ -83,12 +87,52 @@ public class MedicalRecordService {
                 .approvedByTherapist(record.isApprovedByTherapist())
                 .build();
     }
+    @Transactional
+    public void editMedicalRecord(
+            String recordId,
+            MedicalRecordRequestDTO dto
+    ) {
+        MedicalRecord record = medicalRecordRepository.findById(recordId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "MedicalRecord not found with id " + recordId
+                        ));
+        if (dto.getSymptoms() != null)
+            record.setSymptoms(dto.getSymptoms());
+        if (dto.getMedications() != null)
+            record.setMedications(dto.getMedications());
+        if (dto.getFollowUpRequired() != null)
+            record.setFollowUpRequired(dto.getFollowUpRequired());
+        if(dto.getTherapistId() != null)
+            record.setTherapistId(dto.getTherapistId());
+	    record.setNeedTherapy(dto.isNeedTherapy());
+        if(dto.getPrescribedTreatment() !=null)
+            record.setPrescribedTreatment(dto.getPrescribedTreatment());
+        medicalRecordRepository.save(record);
+
+        log.info("Saved Record new : {}",record);
+    }
+
+    public MedicalRecordTransfer medicalRecordConvertToMedicalRecordTransfer(
+            MedicalRecord record
+    ) {
+        Patient patient = patientRepository.findByUserId(record.getPatient().getUserId());
+        return MedicalRecordTransfer.builder()
+                .medicalRecordId(record.getMedicalRecordId())
+                .patientId(record.getPatient().getUserId())
+                .doctorId(record.getDoctorId())
+                .patientName(patient.getName())
+                .therapistId(record.getTherapistId())
+                .visitDate(record.getVisitDate())
+                .createdDate(record.getCreatedDate())
+                .build();
+    }
 
 
 
     // Update editable fields in a medical record
     @Transactional
-    public MedicalRecord updateMedicalRecord(Long id, MedicalRecord updatedRecord) {
+    public MedicalRecord updateMedicalRecord(String id, MedicalRecord updatedRecord) {
         MedicalRecord existing = medicalRecordRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("MedicalRecord not found with id: " + id));
 
@@ -103,7 +147,7 @@ public class MedicalRecordService {
 
     // Assign therapist to a record
     @Transactional
-    public MedicalRecord assignTherapist(Long recordId, String therapistId) {
+    public MedicalRecord assignTherapist(String recordId, String therapistId) {
         MedicalRecord record = medicalRecordRepository.findById(recordId)
                 .orElseThrow(() -> new IllegalArgumentException("Medical Record not found with id " + recordId));
 
@@ -112,21 +156,20 @@ public class MedicalRecordService {
     }
 
     // Delete record
-    public void deleteMedicalRecord(Long recordId) {
+    public void deleteMedicalRecord(String recordId) {
         MedicalRecord record = medicalRecordRepository.findById(recordId)
                 .orElseThrow(() -> new IllegalArgumentException("Medical Record not found with ID: " + recordId));
         medicalRecordRepository.delete(record);
     }
 
     // Create record from patient request DTO
-    public Boolean createFromPatientRequest(MedicalRecordRequestDTO dto) {
+    public boolean addMedicalRecord(MedicalRecordRequestDTO dto) {
         Patient patient = patientRepository.findByUserId(dto.getPatientId());
-        log.info("Patient : {}",patient);
         if(patient==null){
             log.error("Patient not found with id : {}",dto.getPatientId());
-            return false;
+            throw new RuntimeException("No Patient");
         }
-
+        log.info("Patient found for appointment post : {}",patient);
         MedicalRecord record = MedicalRecord.builder()
                 .doctorId(dto.getDoctorId())
                 .symptoms(dto.getSymptoms())
@@ -134,11 +177,19 @@ public class MedicalRecordService {
                 .medications(dto.getMedications())
                 .followUpRequired(dto.getFollowUpRequired())
                 .build();
-        medicalRecordRepository.save(record);
+
+        log.info("Medical Record Formed");
+
+        MedicalRecord savedRecord = medicalRecordRepository.save(record);
+        log.info("saved record in patient");
         return true;
     }
 
     public List<MedicalRecordResponseDTO> findAllMedicalRecordsByDoctorId(String docId) {
 	    return medicalRecordRepository.findByDoctorId(docId).stream().map(this::medicalRecordConvertToMedicalRecordResponseDTO).toList();
+    }
+
+    public List<MedicalRecordResponseDTO> findAllMedicalRecordsByTherapistId(String therapistId) {
+        return medicalRecordRepository.findByTherapistId(therapistId).stream().map(this::medicalRecordConvertToMedicalRecordResponseDTO).toList();
     }
 }

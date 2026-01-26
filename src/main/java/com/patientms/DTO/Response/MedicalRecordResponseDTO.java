@@ -12,10 +12,10 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class MedicalRecordResponseDTO {
-
-    private Long id;
+    private String medicalRecordId;
 
     private String patientId;
+    private String patientName;
     private String doctorId;
     private String therapistId;
 

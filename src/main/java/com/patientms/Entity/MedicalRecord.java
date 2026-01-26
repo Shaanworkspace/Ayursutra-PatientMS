@@ -28,8 +28,9 @@ import java.util.List;
 public class MedicalRecord {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false)
+    private String medicalRecordId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", nullable = false)
@@ -42,19 +43,18 @@ public class MedicalRecord {
 
     @Column(length = 255)
     private String symptoms;
-    @Lob
+
     private String prescribedTreatment;
 
     /*
     This will update By Doctor
      */
-    @Lob
     private String medications;
     private String followUpRequired;
-    private boolean needTherapy; // yes or no
+    private boolean needTherapy;
 
 
-    private String therapistId;  //Patient krega update
+    private String therapistId;
 
     /*
     Therapist update krega

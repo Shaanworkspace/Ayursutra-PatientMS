@@ -8,6 +8,7 @@ import com.patientms.Repository.PatientRepository;
 import com.patientms.Service.PatientService;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/patients")
 @RequiredArgsConstructor
+@Slf4j
 public class PatientController {
 
     private final PatientService patientService;
@@ -45,16 +47,19 @@ public class PatientController {
         return patientRepository.existsByUserId(id);
     }
     @GetMapping("/profile/me")
-    public Patient getMyProfile(Authentication authentication) {
+    public PatientResponseDTO getMyProfile(Authentication authentication) {
+        String email = (String) authentication.getPrincipal();
+        boolean exist = patientRepository.existsByEmail(email);
+        if (!exist){
+            throw new RuntimeException(
+                    "Patient not Exist for email: " + email
+            );
+        }
+        log.info("Patients controller METHOD : GET , REQUEST : profile/me , principle of authentication with Email :{} ",email);
+        Patient patient = patientRepository.findByEmail(email);
 
-        // JWT filter me principle me userId hota h
-        String userId = (String) authentication.getPrincipal();
-
-
-        return patientRepository.findById(userId)
-                .orElseThrow(() ->
-                        new RuntimeException("Patient not found for userId: " + userId)
-                );
+        if (patient == null) throw new RuntimeException("Patient not found for email: " + email);
+        return patientService.patientToDto(patient);
     }
 
 

@@ -32,6 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String header = request.getHeader("Authorization");
 		if (header == null || !header.startsWith("Bearer ")) {
+			log.info("No Header");
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -52,6 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 								List.of(() -> "ROLE_SERVICE")
 						);
 
+				log.info("We set this request :{} as role : ROLE_SERVICE",request.getRequestURI());
 				SecurityContextHolder.getContext().setAuthentication(auth);
 			} else {
 				log.info("User token for userId/email: {}", subject);
@@ -59,9 +61,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 						new UsernamePasswordAuthenticationToken(
 								subject,
 								null,
-								List.of(() -> "ROLE_USER")
+								List.of(() -> "ROLE_PATIENT")
 						);
-
+				log.info("We set this request :{} as role : ROLE_PATIENT",request.getRequestURI());
 				SecurityContextHolder.getContext().setAuthentication(auth);
 			}
 		} catch (Exception e) {

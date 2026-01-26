@@ -8,7 +8,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Long> {
+public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, String> {
     List<MedicalRecord> findByPatientUserId(String patientId);
     List<MedicalRecord> findByDoctorId(String doctorId);
+
+    MedicalRecord findByMedicalRecordId(String medicalRecordId);
+
+	List<MedicalRecord>  findByTherapistId(String therapistId);
 }

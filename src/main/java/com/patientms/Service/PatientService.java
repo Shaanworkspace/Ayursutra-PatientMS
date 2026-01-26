@@ -22,11 +22,12 @@ public class PatientService {
     private final MedicalRecordService medicalRecordService;
 
     public PatientResponseDTO registerPatient(RegisterRequestDTO registerRequest) {
-        if(patientRepository.existsByUserId((registerRequest.getUserId()))){
-            Patient existingPatient = patientRepository.findByUserId(registerRequest.getUserId());
+        if(patientRepository.existsByEmail((registerRequest.getEmail()))){
+            Patient existingPatient = patientRepository.findByEmail(registerRequest.getEmail());
             return patientToDto(existingPatient);
         }
         Patient patient = Patient.builder()
+                .email(registerRequest.getEmail())
                 .userId(registerRequest.getUserId())
                 .name(registerRequest.getName())
                 .password(registerRequest.getPassword())
@@ -45,6 +46,7 @@ public class PatientService {
                         .collect(Collectors.toList());
 
         return PatientResponseDTO.builder()
+                .email(patient.getEmail())
                .gender(patient.getGender())
                .medicalRecords(medicalRecordResponseDTOList)
                .phoneNumber(patient.getPhoneNumber())

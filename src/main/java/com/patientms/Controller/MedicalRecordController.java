@@ -21,129 +21,173 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MedicalRecordController {
 
-    private final MedicalRecordService medicalRecordService;
-    private final MedicalRecordRepository medicalRecordRepository;
-    private final MedicalRecordMessageProducer medicalRecordMessageProducer;
-    // ======================================
-    //              GET METHODS
-    // ======================================
-    @GetMapping("/health")
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("PATIENT SERVICE UP");
-    }
-    /** Get all records */
-    @GetMapping
-    public ResponseEntity<List<MedicalRecordResponseDTO>> getAllRecords() {
-        return ResponseEntity.ok(medicalRecordService.getAllMedicalRecords());
-    }
 
-    /** Get record by ID */
-    @GetMapping("/{recordId}")
-    public ResponseEntity<MedicalRecordResponseDTO> getRecordById(@PathVariable Long recordId) {
-        try {
-            MedicalRecordResponseDTO record = medicalRecordService.getMedicalRecordById(recordId);
-            return ResponseEntity.ok(record);
-        } catch (IllegalArgumentException e) {
-            // If the record isn’t found, return 404 with an error message
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
+	private final MedicalRecordService medicalRecordService;
+	private final MedicalRecordRepository medicalRecordRepository;
+	private final MedicalRecordMessageProducer medicalRecordMessageProducer;
 
-    @GetMapping("/doc/{docId}")
-    public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByDocId(@PathVariable String docId) {
-        try {
-            List<MedicalRecordResponseDTO> record = medicalRecordService.findAllMedicalRecordsByDoctorId(docId);
-            return ResponseEntity.ok(record);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
+	// ======================================
+	//              GET METHODS
+	// ======================================
+	@GetMapping("/health")
+	public ResponseEntity<String> health() {
+		return ResponseEntity.ok("Medical SERVICE UP");
+	}
+
+	/**
+	 * Get all records
+	 */
+	@GetMapping
+	public ResponseEntity<List<MedicalRecordResponseDTO>> getAllRecords() {
+		return ResponseEntity.ok(medicalRecordService.getAllMedicalRecords());
+	}
+
+	/**
+	 * Get record by ID
+	 */
+	@GetMapping("/{recordId}")
+	public ResponseEntity<MedicalRecordResponseDTO> getRecordById(@PathVariable String recordId) {
+		try {
+			log.info("Get record by id: {}", recordId);
+			MedicalRecordResponseDTO record = medicalRecordService.getMedicalRecordById(recordId);
+			return ResponseEntity.ok(record);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+	}
+
+	@GetMapping("/doc/{docId}")
+	public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByDocId(@PathVariable String docId) {
+		try {
+			List<MedicalRecordResponseDTO> record = medicalRecordService.findAllMedicalRecordsByDoctorId(docId);
+			return ResponseEntity.ok(record);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+	}
 
 
-    /** Get all records for a patient */
-    @GetMapping("/patient")
-    public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByPatient(@RequestParam  String patientId) {
-        return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByPatient(patientId));
-    }
+	@GetMapping("/therapist/{therapistId}")
+	public ResponseEntity<List<MedicalRecordResponseDTO>> medicalRecordsByTherapistId(@PathVariable String therapistId) {
+		try {
+			List<MedicalRecordResponseDTO> record = medicalRecordService.findAllMedicalRecordsByTherapistId(therapistId);
+			return ResponseEntity.ok(record);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+	}
 
-    /** Get all records for a doctor */
-    @GetMapping("/doctor")
-    public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByDoctor(@RequestParam String doctorId) {
-        return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByDoctor(doctorId));
-    }
 
-    // ======================================
-    //              POST METHODS
-    // ======================================
+	/**
+	 * Get all records for a patient
+	 */
+	@GetMapping("/patient")
+	public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByPatient(@RequestParam String patientId) {
+		return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByPatient(patientId));
+	}
 
-    /**
-     * Create a medical record (patient + doctor passed in)
-     */
-    @PostMapping("/book")
-    public ResponseEntity<Boolean> createMedicalRecord(@RequestBody MedicalRecordRequestDTO dto) {
-        Boolean saved = medicalRecordService.createFromPatientRequest(dto);
-        log.info("Saving Medical record with data : {} with saving status : {}",dto,saved);
+	/**
+	 * Get all records for a doctor
+	 */
+	@GetMapping("/doctor")
+	public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByDoctor(@RequestParam String doctorId) {
+		return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByDoctor(doctorId));
+	}
 
-        if(saved) return ResponseEntity.status(HttpStatus.CREATED).body(true);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
-    }
+	// ======================================
+	//              POST METHODS
+	// ======================================
 
-    // ======================================
-    //              PUT METHODS
-    // ======================================
+	/**
+	 * Create a medical record (patient + doctor passed in)
+	 */
+	@PostMapping("/book")
+	public ResponseEntity<String> createMedicalRecord(@RequestBody MedicalRecordRequestDTO dto) {
+		boolean saved = medicalRecordService.addMedicalRecord(dto);
+		log.info("Saving Medical record with data : {} with saving status : {}", dto, saved);
+		return ResponseEntity.status(HttpStatus.CREATED).body("Saved");
+	}
 
-    /** Update therapies (assign or modify therapy list for a record) */
-    @PutMapping("/{recordId}/therapies")
-    public ResponseEntity<?> updateTherapies(
-            @PathVariable Long recordId,
-            @RequestBody TherapyUpdateRequest req) {
-        try {
-            MedicalRecord updated = medicalRecordService.updateTherapies(
-                    recordId,
-                    req.isNeedTherapy(),
-                    req.getTherapyIds()
-            );
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No!!! " + e.getMessage());
-        }
-    }
+	// ======================================
+	//              PUT METHODS
+	// ======================================
 
-    /** Assign therapist to a medical record */
-    @PutMapping("/{recordId}/assign-therapist")
-    public ResponseEntity<?> assignTherapistToRecord(@PathVariable Long recordId,
-                                                     @RequestParam String therapistId) {
-        try {
-            MedicalRecord updated = medicalRecordService.assignTherapist(recordId, therapistId);
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ " + e.getMessage());
-        }
-    }
+	/**
+	 * Update therapies (assign or modify therapy list for a record)
+	 */
+	@PutMapping("/{recordId}/therapies")
+	public ResponseEntity<?> updateTherapies(
+			@PathVariable String recordId,
+			@RequestBody TherapyUpdateRequest req) {
+		try {
+			MedicalRecord updated = medicalRecordService.updateTherapies(
+					recordId,
+					req.isNeedTherapy(),
+					req.getTherapyIds()
+			);
+			return ResponseEntity.ok(updated);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No!!! " + e.getMessage());
+		}
+	}
 
-    /** Update a medical record (doctor adds diagnosis, treatment, etc.) */
-    @PutMapping("/{recordId}")
-    public ResponseEntity<?> updateMedicalRecord(@PathVariable Long recordId, @RequestBody MedicalRecord updatedData) {
-        try {
-            MedicalRecord updated = medicalRecordService.updateMedicalRecord(recordId, updatedData);
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ " + e.getMessage());
-        }
-    }
 
-    // ======================================
-    //              DELETE METHODS
-    // ======================================
+	/**
+	 * Assign therapist to a medical record
+	 */
+	@PutMapping("/{recordId}/assign-therapist")
+	public ResponseEntity<?> assignTherapistToRecord(@PathVariable String recordId,
+	                                                 @RequestParam String therapistId) {
+		try {
+			MedicalRecord updated = medicalRecordService.assignTherapist(recordId, therapistId);
+			return ResponseEntity.ok(updated);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("!!!! " + e.getMessage());
+		}
+	}
 
-    /** Delete a medical record */
-    @DeleteMapping("/{recordId}")
-    public ResponseEntity<String> deleteRecord(@PathVariable Long recordId) {
-        try {
-            medicalRecordService.deleteMedicalRecord(recordId);
-            return ResponseEntity.ok("Medical record deleted with ID: " + recordId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ " + e.getMessage());
-        }
-    }
+	@PutMapping("/edit/{recordId}")
+	public boolean editMedicalRecord(
+			@PathVariable String recordId,
+			@RequestBody MedicalRecordRequestDTO dto
+	) {
+		try {
+			medicalRecordService.editMedicalRecord(recordId, dto);
+			return true;
+		} catch (IllegalArgumentException e) {
+			log.info("Not Able to update");
+			return false;
+		}
+	}
+
+
+	/**
+	 * Update a medical record (doctor adds diagnosis, treatment, etc.)
+	 */
+	@PutMapping("/{recordId}")
+	public ResponseEntity<?> updateMedicalRecord(@PathVariable String recordId, @RequestBody MedicalRecord updatedData) {
+		try {
+			MedicalRecord updated = medicalRecordService.updateMedicalRecord(recordId, updatedData);
+			return ResponseEntity.ok(updated);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(" " + e.getMessage());
+		}
+	}
+
+	// ======================================
+	//              DELETE METHODS
+	// ======================================
+
+	/**
+	 * Delete a medical record
+	 */
+	@DeleteMapping("/{recordId}")
+	public ResponseEntity<String> deleteRecord(@PathVariable String recordId) {
+		try {
+			medicalRecordService.deleteMedicalRecord(recordId);
+			return ResponseEntity.ok("Medical record deleted with ID: " + recordId);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("!!!!  " + e.getMessage());
+		}
+	}
 }

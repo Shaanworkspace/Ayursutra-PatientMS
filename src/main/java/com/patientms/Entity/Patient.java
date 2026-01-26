@@ -29,6 +29,8 @@ public class Patient {
     private String emergencyContact;
 
     // Only to check : Password,  Email stored for login , Not Mandatory
+    @Column(unique = true)
+    private String email;
     private String password;
 
     private LocalDateTime createdAt;

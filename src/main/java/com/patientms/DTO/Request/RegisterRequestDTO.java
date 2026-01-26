@@ -13,8 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RegisterRequestDTO {
     private String userId;
-
-    @NotBlank(message = "Password Required")
-    @Size(min=2,message = "Invalid Password")
+    private String name;
     private String password;
 }

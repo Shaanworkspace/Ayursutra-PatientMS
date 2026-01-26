@@ -41,8 +41,8 @@ public class PatientController {
 
     /** Get patient by ID */
     @GetMapping("/check/{id}")
-    public ResponseEntity<Patient> getPatientById(@PathVariable String id) {
-        return ResponseEntity.ok(patientService.getPatientByUserId(id));
+    public boolean getPatientById(@PathVariable String id) {
+        return patientRepository.existsByUserId(id);
     }
     @GetMapping("/profile/me")
     public Patient getMyProfile(Authentication authentication) {

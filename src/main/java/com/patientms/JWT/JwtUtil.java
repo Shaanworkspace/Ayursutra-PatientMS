@@ -19,7 +19,7 @@ public class JwtUtil {
 		return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public Claims extractAllClaims(String token) {
+	public Claims getClaims(String token) {
 		return Jwts.parser()
 				.verifyWith(getSecretKey())
 				.build()
@@ -27,8 +27,7 @@ public class JwtUtil {
 				.getPayload();
 	}
 
-	public String extractUserId(String token) {
-		Object userId = extractAllClaims(token).get("userId");
-		return String.valueOf(userId);
+	public boolean isServiceToken(Claims claims) {
+		return "SERVICE".equals(claims.get("type"));
 	}
 }

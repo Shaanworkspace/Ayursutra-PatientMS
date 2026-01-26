@@ -1,17 +1,10 @@
-# ===============================
-# = Environment Variables
-# ===============================
-
-# --- Server Configuration ---
 PORT=8082
 
-# --- Local MySQL Database ---
+
 DB_URL=jdbc:mysql://localhost:3306/ayursutraMicroservices-patient?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 DB_USERNAME=root
 DB_PASSWORD=1234
 
-# --- Eureka Service Registry ---
-EUREKA_SERVER_URL=http://localhost:8761/eureka/
 
 # --- RabbitMQ (Docker container) ---
 RABBITMQ_USER=xxdyrbyp
@@ -27,3 +20,12 @@ RABBITMQ_VHOST=xxdyrbyp
 AUTH0_DOMAIN=dev-vot8ozkku4yvlaqo.us.auth0.com
 
 jwt.secretkeyENV = asdfkljhasfhkdjlashfjksdkfhioqwteiruncvzxmiye
+
+
+
+
+services.doctor.url=http://localhost:8081
+services.patient.url=http://localhost:8082
+services.therapist.url=http://localhost:8083
+services.user.url=http://localhost:8086
+services.api.url=http://localhost:8085

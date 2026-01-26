@@ -2,12 +2,16 @@ package com.patientms.Service;
 
 import com.patientms.DTO.Request.MedicalRecordRequestDTO;
 import com.patientms.DTO.Request.RegisterRequestDTO;
+import com.patientms.DTO.Response.MedicalRecordResponseDTO;
 import com.patientms.DTO.Response.PatientResponseDTO;
 import com.patientms.Entity.Patient;
 import com.patientms.Repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,6 +19,7 @@ import java.util.stream.Collectors;
 public class PatientService {
 
     private final PatientRepository patientRepository;
+    private final MedicalRecordService medicalRecordService;
 
     public PatientResponseDTO registerPatient(RegisterRequestDTO registerRequest) {
         if(patientRepository.existsByUserId((registerRequest.getUserId()))){
@@ -23,6 +28,7 @@ public class PatientService {
         }
         Patient patient = Patient.builder()
                 .userId(registerRequest.getUserId())
+                .name(registerRequest.getName())
                 .password(registerRequest.getPassword())
                 .build();
         patientRepository.save(patient);
@@ -31,15 +37,19 @@ public class PatientService {
 
 
     public PatientResponseDTO patientToDto(Patient patient) {
-                return new PatientResponseDTO(
-                patient.getUserId()
-                ,patient.getGender(), patient.getPhoneNumber(), null
-        );
-    }
+        List<MedicalRecordResponseDTO> medicalRecordResponseDTOList =
+                Optional.ofNullable(patient.getMedicalRecords())
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .map(medicalRecordService::medicalRecordConvertToMedicalRecordResponseDTO)
+                        .collect(Collectors.toList());
 
-    // Get patient by ID
-    public Patient getPatientByUserId(String id) {
-	    return patientRepository.findByUserId(id);
+        return PatientResponseDTO.builder()
+               .gender(patient.getGender())
+               .medicalRecords(medicalRecordResponseDTOList)
+               .phoneNumber(patient.getPhoneNumber())
+               .userId(patient.getUserId())
+               .build();
     }
 
     //  Get all patients with mapped DTOs

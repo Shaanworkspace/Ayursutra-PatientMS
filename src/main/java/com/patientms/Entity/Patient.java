@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "patients")
@@ -15,7 +17,7 @@ import java.time.LocalDateTime;
 public class Patient {
     @Id
     private String userId;
-
+    private String name;
     private Integer age;
     private String gender;
     private LocalDate dateOfBirth;
@@ -54,6 +56,14 @@ public class Patient {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
+
+    @OneToMany(
+            mappedBy = "patient",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<MedicalRecord> medicalRecords = new ArrayList<>();
+
 
     @PreUpdate
     protected void onUpdate() {

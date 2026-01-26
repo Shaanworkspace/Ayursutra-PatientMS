@@ -1,6 +1,7 @@
 package com.patientms.Messaging;
 
-import com.patientms.DTO.Request.MedicalRecordRequestDTO;import com.patientms.Entity.MedicalRecord;
+import com.patientms.DTO.Response.MedicalRecordResponseDTO;
+import com.patientms.Entity.MedicalRecord;
 import com.patientms.Service.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ public class MedicalRecordMessageProducer {
         log.info("Triggering sendRecord: preparing message for medicalRecordQueue. MedicalRecord ID: {}", medicalRecord.getId());
 
         try {
-            MedicalRecordRequestDTO dto = medicalRecordService.medicalRecordConvertToMedicalRecordRequestDTO(medicalRecord);
+            MedicalRecordResponseDTO dto = medicalRecordService.medicalRecordConvertToMedicalRecordResponseDTO(medicalRecord);
             rabbitTemplate.convertAndSend("medicalRecordQueue", dto);
 
             log.info("Message successfully sent to medicalRecordQueue for MedicalRecord ID: {}", medicalRecord.getId());

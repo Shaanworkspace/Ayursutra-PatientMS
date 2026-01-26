@@ -1,6 +1,6 @@
 package com.patientms.Configuration;
 
-import com.patientms.JWT.JwtAuthenticationFilter;
+import com.patientms.JWT.Filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +28,9 @@ public class SecurityConfig {
 						)
 				)
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/api/patients/health","/api/patients/emailCheck/**").permitAll()
+						.requestMatchers("/api/patients/health").permitAll()
+						.requestMatchers("/api/patients/internal/**")
+						.hasRole("SERVICE")
 						.anyRequest().authenticated()
 				)
 				.addFilterBefore(

@@ -1,40 +1,33 @@
 package com.patientms.DTO.Response;
 
-import com.patientms.ENUM.Status;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class MedicalRecordResponseDTO {
 
     private Long id;
-    private LocalDateTime visitDate;
+
+    private String patientId;
+    private String doctorId;
+    private String therapistId;
+
+    private LocalDate visitDate;
+    private LocalDate createdDate;
+
     private String symptoms;
-    private String diagnosis;
     private String prescribedTreatment;
 
-    // Essentials for doctor & patient
-    private Long patientId;
+    private String medications;
+    private String followUpRequired;
+    private boolean needTherapy;
 
-
-    private Long doctorId;
-
-
-    private Long therapistId;
-
-
-    private LocalDate createdDate;
-    private String therapyName;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private Status status;
-    private Integer noOfDays;
-    private String doctorNotes;
-    private Double rating;
+    private boolean approvedByTherapist;
 }

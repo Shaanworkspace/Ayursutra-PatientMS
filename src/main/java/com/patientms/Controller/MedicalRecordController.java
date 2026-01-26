@@ -3,25 +3,26 @@ package com.patientms.Controller;
 import com.patientms.DTO.Request.MedicalRecordRequestDTO;
 import com.patientms.DTO.Request.TherapyUpdateRequest;
 import com.patientms.DTO.Response.MedicalRecordResponseDTO;
-import com.patientms.ENUM.Status;
 import com.patientms.Entity.MedicalRecord;
 import com.patientms.Messaging.MedicalRecordMessageProducer;
-import com.patientms.Service.MedicalRecordService;
+import com.patientms.Repository.MedicalRecordRepository;
 import com.patientms.Service.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/medical-records")
+@RequestMapping("/api/patients/medical-records")
 @RequiredArgsConstructor
 public class MedicalRecordController {
 
     private final MedicalRecordService medicalRecordService;
+    private final MedicalRecordRepository medicalRecordRepository;
     private final MedicalRecordMessageProducer medicalRecordMessageProducer;
     // ======================================
     //              GET METHODS
@@ -48,16 +49,26 @@ public class MedicalRecordController {
         }
     }
 
+    @GetMapping("/doc/{docId}")
+    public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByDocId(@PathVariable String docId) {
+        try {
+            List<MedicalRecordResponseDTO> record = medicalRecordService.findAllMedicalRecordsByDoctorId(docId);
+            return ResponseEntity.ok(record);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
 
     /** Get all records for a patient */
     @GetMapping("/patient")
-    public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByPatient(@RequestParam  Long patientId) {
+    public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByPatient(@RequestParam  String patientId) {
         return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByPatient(patientId));
     }
 
     /** Get all records for a doctor */
     @GetMapping("/doctor")
-    public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByDoctor(@RequestParam Long doctorId) {
+    public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByDoctor(@RequestParam String doctorId) {
         return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByDoctor(doctorId));
     }
 
@@ -65,15 +76,16 @@ public class MedicalRecordController {
     //              POST METHODS
     // ======================================
 
-    /** Create a medical record (patient + doctor passed in) */
-    @PostMapping("/byPatient")
-    public ResponseEntity<Long> createMedicalRecord(@RequestBody MedicalRecordRequestDTO dto) {
-        MedicalRecord saved = medicalRecordService.createFromPatientRequest(dto);
-        /*
-        Message through RabbitMQ to update medical record to doctor
-         */
-        medicalRecordMessageProducer.sendRecord(saved);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved.getId());
+    /**
+     * Create a medical record (patient + doctor passed in)
+     */
+    @PostMapping("/book")
+    public ResponseEntity<Boolean> createMedicalRecord(@RequestBody MedicalRecordRequestDTO dto) {
+        Boolean saved = medicalRecordService.createFromPatientRequest(dto);
+        log.info("Saving Medical record with data : {} with saving status : {}",dto,saved);
+
+        if(saved) return ResponseEntity.status(HttpStatus.CREATED).body(true);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
     }
 
     // ======================================
@@ -96,45 +108,11 @@ public class MedicalRecordController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No!!! " + e.getMessage());
         }
     }
-    @PutMapping("/status-change/{id}")
-    public ResponseEntity<Map<String,Object>> changeStatus(@PathVariable Long id, @RequestParam String status, @RequestParam Long doctorId){
-        try{
-            Status newStatus = Status.fromValue(status); // Convert string --> enum safely (case-insensitive)
-
-            medicalRecordService.updateStatus(id,newStatus,doctorId);
-
-            Map<String, Object> response = Map.of(
-                    "id", id,
-                    "doctorId", doctorId,
-                    "status", newStatus.name()
-            );
-
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e){
-            Map<String, Object> error = Map.of(
-                    "success", false,
-                    "error", "Invalid status or unauthorized doctor",
-                    "message", e.getMessage()
-            );
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(error);
-        } catch (Exception e) {
-            Map<String, Object> error = Map.of(
-                    "success", false,
-                    "error", "Record not found",
-                    "message", "Record not found for ID: " + id
-            );
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(error);
-        }
-    }
 
     /** Assign therapist to a medical record */
     @PutMapping("/{recordId}/assign-therapist")
     public ResponseEntity<?> assignTherapistToRecord(@PathVariable Long recordId,
-                                                     @RequestParam Long therapistId) {
+                                                     @RequestParam String therapistId) {
         try {
             MedicalRecord updated = medicalRecordService.assignTherapist(recordId, therapistId);
             return ResponseEntity.ok(updated);

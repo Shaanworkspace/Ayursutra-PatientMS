@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			FilterChain filterChain
 	) throws ServletException, IOException {
 
-		log.info("Accepted By Jwt Filter in PatientMS request: {}", request.getRequestURI());
+		log.info("Accepted By Jwt Filter of PatientMS request: {}", request.getRequestURI());
 
 		String header = request.getHeader("Authorization");
 		if (header == null || !header.startsWith("Bearer ")) {
@@ -56,15 +56,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				log.info("We set this request :{} as role : ROLE_SERVICE",request.getRequestURI());
 				SecurityContextHolder.getContext().setAuthentication(auth);
 			} else {
-				log.info("User token for userId/email: {}", subject);
+				log.info("Extracting token subject : {}", subject);
+				String role = claims.get("role", String.class);
+
+				if (role == null) {
+					throw new RuntimeException("Role missing in JWT");
+				}
+
 				UsernamePasswordAuthenticationToken auth =
 						new UsernamePasswordAuthenticationToken(
 								subject,
 								null,
-								List.of(() -> "ROLE_PATIENT")
+								List.of(() -> "ROLE_" + role)
 						);
-				log.info("We set this request :{} as role : ROLE_PATIENT",request.getRequestURI());
+
+				log.info(
+						"We set this request : {} as role : ROLE_{}",
+						request.getRequestURI(),
+						role
+				);
+
 				SecurityContextHolder.getContext().setAuthentication(auth);
+
 			}
 		} catch (Exception e) {
 			log.error("Invalid JWT Declared by Patient Service", e);

@@ -1,30 +1,20 @@
 package com.patientms.Entity;
 
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.patientms.ENUM.Status;
+import com.patientms.ENUM.TherapyType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id"
-)
+
 @Entity
 @Table(name = "medical_records")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
+@Getter
+@Setter
 public class MedicalRecord {
 
     @Id
@@ -51,7 +41,7 @@ public class MedicalRecord {
      */
     private String medications;
     private String followUpRequired;
-    private boolean needTherapy;
+
 
 
     private String therapistId;
@@ -60,9 +50,18 @@ public class MedicalRecord {
     Therapist update krega
      */
     private boolean approvedByTherapist;
+    private boolean needTherapy;
+
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    private List<TherapyType> therapies;
+
+    private String therapistNotes;
+    private String sessionStatus;
 
     @PrePersist
     protected void onCreate() {
         this.createdDate = LocalDate.now();
     }
+
 }

@@ -3,6 +3,7 @@ package com.patientms.Service;
 import com.patientms.Client.DoctorClient;
 import com.patientms.DTO.Request.MedicalRecordRequestDTO;
 import com.patientms.DTO.Request.MedicalRecordTransfer;
+import com.patientms.DTO.Request.TherapistRecordUpdateRequest;
 import com.patientms.DTO.Response.MedicalRecordResponseDTO;
 import com.patientms.Entity.MedicalRecord;
 import com.patientms.Entity.Patient;
@@ -26,6 +27,37 @@ public class MedicalRecordService {
     private final DoctorClient doctorClient;
     private MedicalRecord record;
 
+    @Transactional
+    public MedicalRecord updateByTherapist(
+            String recordId,
+            TherapistRecordUpdateRequest req
+    ) {
+        MedicalRecord record = medicalRecordRepository
+                .findById(recordId)
+                .orElseThrow(() -> new IllegalArgumentException("Record not found"));
+
+        if (req.getNeedTherapy() != null) {
+            record.setNeedTherapy(req.getNeedTherapy());
+
+            if (!req.getNeedTherapy()) {
+                record.getTherapies().clear();
+            }
+        }
+
+        if (req.getTherapies() != null && record.isNeedTherapy()) {
+            record.setTherapies(req.getTherapies());
+        }
+
+        if (req.getTherapistNotes() != null) {
+            record.setTherapistNotes(req.getTherapistNotes());
+        }
+
+        if (req.getSessionStatus() != null) {
+            record.setSessionStatus(req.getSessionStatus());
+        }
+log.info("Updated medical record by therapist going to save : {}",record);
+        return medicalRecordRepository.save(record);
+    }
 
     // Update therapy requirements
     @Transactional

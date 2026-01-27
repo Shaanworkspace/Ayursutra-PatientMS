@@ -1,6 +1,7 @@
 package com.patientms.Controller;
 
 import com.patientms.DTO.Request.MedicalRecordRequestDTO;
+import com.patientms.DTO.Request.TherapistRecordUpdateRequest;
 import com.patientms.DTO.Request.TherapyUpdateRequest;
 import com.patientms.DTO.Response.MedicalRecordResponseDTO;
 import com.patientms.Entity.MedicalRecord;
@@ -129,6 +130,16 @@ public class MedicalRecordController {
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No!!! " + e.getMessage());
 		}
+	}
+	@PutMapping("/{recordId}/therapist-update")
+	public ResponseEntity<?> therapistUpdateRecord(
+			@PathVariable String recordId,
+			@RequestBody TherapistRecordUpdateRequest req
+	) {
+		log.info("Updating medical record by therapist with record id:{}, and re:{}",recordId,req);
+		MedicalRecord updated =
+				medicalRecordService.updateByTherapist(recordId, req);
+		return ResponseEntity.ok(medicalRecordService.medicalRecordConvertToMedicalRecordResponseDTO(updated));
 	}
 
 

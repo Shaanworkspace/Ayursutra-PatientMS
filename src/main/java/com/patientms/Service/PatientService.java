@@ -3,10 +3,14 @@ package com.patientms.Service;
 import com.patientms.DTO.Request.MedicalRecordRequestDTO;
 import com.patientms.DTO.Request.RegisterRequestDTO;
 import com.patientms.DTO.Response.MedicalRecordResponseDTO;
+import com.patientms.DTO.Response.PatientProfileDTO;
 import com.patientms.DTO.Response.PatientResponseDTO;
+import com.patientms.Entity.MedicalRecord;
 import com.patientms.Entity.Patient;
+import com.patientms.Repository.MedicalRecordRepository;
 import com.patientms.Repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -19,6 +23,7 @@ import java.util.stream.Collectors;
 public class PatientService {
 
     private final PatientRepository patientRepository;
+    private final MedicalRecordRepository medicalRecordRepository;
     private final MedicalRecordService medicalRecordService;
 
     public PatientResponseDTO registerPatient(RegisterRequestDTO registerRequest) {
@@ -38,12 +43,10 @@ public class PatientService {
 
 
     public PatientResponseDTO patientToDto(Patient patient) {
-        List<MedicalRecordResponseDTO> medicalRecordResponseDTOList =
-                Optional.ofNullable(patient.getMedicalRecords())
-                        .orElse(Collections.emptyList())
-                        .stream()
-                        .map(medicalRecordService::medicalRecordConvertToMedicalRecordResponseDTO)
-                        .collect(Collectors.toList());
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findMedicalRecordsByPatientId(patient.getUserId());
+        List<MedicalRecordResponseDTO> medicalRecordResponseDTOList = medicalRecords.stream()
+                .map(medicalRecordService::medicalRecordConvertToMedicalRecordResponseDTO)
+                .toList();
 
         return PatientResponseDTO.builder()
                 .email(patient.getEmail())
@@ -80,19 +83,15 @@ public class PatientService {
 
     /** Book an appointment and create medical record */
     public PatientResponseDTO addMedicalRecord(Long patientId, MedicalRecordRequestDTO medicalRecordRequestDTO){
-//        Patient patient = patientRepository.findById(patientId).orElseThrow(()-> new IllegalArgumentException("Patient not found with ID: " + patientId));
-//        medicalRecordRequestDTO.setPatientId(patientId);
-//
-//        Long newRecordId = restTemplate.postForObject(medicalRecordServiceUrl, medicalRecordRequestDTO, Long.class);
-//
-//        if (patient.getMedicalRecordsIds() == null)
-//            patient.setMedicalRecordsIds(new ArrayList<>());
-//
-//        patient.getMedicalRecordsIds().add(newRecordId);
-//        patientRepository.save(patient);
-//
-//        return patientToDto(patient);
         return null;
     }
 
+	public PatientProfileDTO patientToProfileDto(Patient patient) {
+        return PatientProfileDTO.builder()
+                .email(patient.getEmail())
+                .gender(patient.getGender())
+                .phoneNumber(patient.getPhoneNumber())
+                .userId(patient.getUserId())
+                .build();
+    }
 }

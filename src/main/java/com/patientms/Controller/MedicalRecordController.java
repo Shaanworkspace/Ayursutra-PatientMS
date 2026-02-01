@@ -1,11 +1,9 @@
 package com.patientms.Controller;
 
 import com.patientms.DTO.Request.MedicalRecordRequestDTO;
-import com.patientms.DTO.Request.TherapistRecordUpdateRequest;
-import com.patientms.DTO.Request.TherapyUpdateRequest;
+import com.patientms.DTO.Request.MedicalRecordUpdateRequest;
 import com.patientms.DTO.Response.MedicalRecordResponseDTO;
 import com.patientms.Entity.MedicalRecord;
-import com.patientms.Messaging.MedicalRecordMessageProducer;
 import com.patientms.Repository.MedicalRecordRepository;
 import com.patientms.Service.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +23,6 @@ public class MedicalRecordController {
 
 	private final MedicalRecordService medicalRecordService;
 	private final MedicalRecordRepository medicalRecordRepository;
-	private final MedicalRecordMessageProducer medicalRecordMessageProducer;
 
 	// ======================================
 	//              GET METHODS
@@ -50,11 +47,17 @@ public class MedicalRecordController {
 	public ResponseEntity<MedicalRecordResponseDTO> getRecordById(@PathVariable String recordId) {
 		try {
 			log.info("Get record by id: {}", recordId);
-			MedicalRecordResponseDTO record = medicalRecordService.getMedicalRecordById(recordId);
+			MedicalRecordResponseDTO record = medicalRecordService.getMedicalRecordByMedicalId(recordId);
 			return ResponseEntity.ok(record);
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
+	}
+
+	@GetMapping("/check/{recordId}")
+	public boolean checkRecordById(@PathVariable String recordId) {
+		log.info("Checking record by id: {}", recordId);
+		return medicalRecordRepository.existsMedicalRecordByMedicalRecordId(recordId);
 	}
 
 	@GetMapping("/doc/{docId}")
@@ -67,15 +70,11 @@ public class MedicalRecordController {
 		}
 	}
 
-
-	@GetMapping("/therapist/{therapistId}")
-	public ResponseEntity<List<MedicalRecordResponseDTO>> medicalRecordsByTherapistId(@PathVariable String therapistId) {
-		try {
-			List<MedicalRecordResponseDTO> record = medicalRecordService.findAllMedicalRecordsByTherapistId(therapistId);
-			return ResponseEntity.ok(record);
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
+	@GetMapping("/batch")
+	public List<MedicalRecordResponseDTO> getMedicalRecordsByIds(
+			@RequestParam List<String> ids
+	) {
+		return medicalRecordService.getMedicalRecordsByIds(ids);
 	}
 
 
@@ -84,7 +83,7 @@ public class MedicalRecordController {
 	 */
 	@GetMapping("/patient")
 	public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByPatient(@RequestParam String patientId) {
-		return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByPatient(patientId));
+		return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByPatientId(patientId));
 	}
 
 	/**
@@ -92,7 +91,7 @@ public class MedicalRecordController {
 	 */
 	@GetMapping("/doctor")
 	public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByDoctor(@RequestParam String doctorId) {
-		return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByDoctor(doctorId));
+		return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByDoctorId(doctorId));
 	}
 
 	// ======================================
@@ -116,46 +115,29 @@ public class MedicalRecordController {
 	/**
 	 * Update therapies (assign or modify therapy list for a record)
 	 */
-	@PutMapping("/{recordId}/therapies")
-	public ResponseEntity<?> updateTherapies(
+	@PutMapping("/{recordId}/therapist")
+	public ResponseEntity<Boolean> updateTherapies(
 			@PathVariable String recordId,
-			@RequestBody TherapyUpdateRequest req) {
-		try {
-			MedicalRecord updated = medicalRecordService.updateTherapies(
-					recordId,
-					req.isNeedTherapy(),
-					req.getTherapyIds()
-			);
-			return ResponseEntity.ok(updated);
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No!!! " + e.getMessage());
-		}
+			@RequestBody MedicalRecordUpdateRequest req) {
+
+		boolean updated = medicalRecordService.updateMedicalRecord(recordId,
+				req
+		);
+		if(updated) return ResponseEntity.ok(true);
+		return ResponseEntity.notFound().build();
 	}
+
 	@PutMapping("/{recordId}/therapist-update")
 	public ResponseEntity<?> therapistUpdateRecord(
 			@PathVariable String recordId,
-			@RequestBody TherapistRecordUpdateRequest req
+			@RequestBody MedicalRecordUpdateRequest req
 	) {
-		log.info("Updating medical record by therapist with record id:{}, and re:{}",recordId,req);
+		log.info("Updating medical record by therapist with record id:{}, and re:{}", recordId, req);
 		MedicalRecord updated =
 				medicalRecordService.updateByTherapist(recordId, req);
 		return ResponseEntity.ok(medicalRecordService.medicalRecordConvertToMedicalRecordResponseDTO(updated));
 	}
 
-
-	/**
-	 * Assign therapist to a medical record
-	 */
-	@PutMapping("/{recordId}/assign-therapist")
-	public ResponseEntity<?> assignTherapistToRecord(@PathVariable String recordId,
-	                                                 @RequestParam String therapistId) {
-		try {
-			MedicalRecord updated = medicalRecordService.assignTherapist(recordId, therapistId);
-			return ResponseEntity.ok(updated);
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("!!!! " + e.getMessage());
-		}
-	}
 
 	@PutMapping("/edit/{recordId}")
 	public boolean editMedicalRecord(
@@ -171,19 +153,6 @@ public class MedicalRecordController {
 		}
 	}
 
-
-	/**
-	 * Update a medical record (doctor adds diagnosis, treatment, etc.)
-	 */
-	@PutMapping("/{recordId}")
-	public ResponseEntity<?> updateMedicalRecord(@PathVariable String recordId, @RequestBody MedicalRecord updatedData) {
-		try {
-			MedicalRecord updated = medicalRecordService.updateMedicalRecord(recordId, updatedData);
-			return ResponseEntity.ok(updated);
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(" " + e.getMessage());
-		}
-	}
 
 	// ======================================
 	//              DELETE METHODS

@@ -2,9 +2,14 @@ package com.patientms.Controller;
 
 import com.patientms.DTO.Request.MedicalRecordRequestDTO;
 import com.patientms.DTO.Request.RegisterRequestDTO;
+import com.patientms.DTO.Response.MedicalRecordResponseDTO;
+import com.patientms.DTO.Response.PatientProfileDTO;
 import com.patientms.DTO.Response.PatientResponseDTO;
+import com.patientms.Entity.MedicalRecord;
 import com.patientms.Entity.Patient;
+import com.patientms.Repository.MedicalRecordRepository;
 import com.patientms.Repository.PatientRepository;
+import com.patientms.Service.MedicalRecordService;
 import com.patientms.Service.PatientService;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +32,8 @@ public class PatientController {
     private final PatientService patientService;
     private final RestTemplate restTemplate;
     private final PatientRepository patientRepository;
+    private final MedicalRecordRepository medicalRecordRepository;
+    private final MedicalRecordService medicalRecordService;
 
     // ======================================
     //               GET METHODS
@@ -46,8 +53,18 @@ public class PatientController {
     public boolean getPatientById(@PathVariable String id) {
         return patientRepository.existsByUserId(id);
     }
+
+    @GetMapping("/all/medical-records/{patientId}")
+    public ResponseEntity<List<MedicalRecordResponseDTO>> medicalRecordsByPatientId(@PathVariable String patientId) {
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findMedicalRecordsByPatientId(patientId);
+        List<MedicalRecordResponseDTO> medicalRecordResponseDTOList = medicalRecords.stream()
+                .map(medicalRecordService::medicalRecordConvertToMedicalRecordResponseDTO)
+                .toList();
+        return ResponseEntity.ok(medicalRecordResponseDTOList);
+    }
+
     @GetMapping("/profile/me")
-    public PatientResponseDTO getMyProfile(Authentication authentication) {
+    public ResponseEntity<PatientProfileDTO> getMyProfile(Authentication authentication) {
         String email = (String) authentication.getPrincipal();
         boolean exist = patientRepository.existsByEmail(email);
         if (!exist){
@@ -55,11 +72,12 @@ public class PatientController {
                     "Patient not Exist for email: " + email
             );
         }
-        log.info("Patients controller METHOD : GET , REQUEST : profile/me , principle of authentication with Email :{} ",email);
         Patient patient = patientRepository.findByEmail(email);
-
-        if (patient == null) throw new RuntimeException("Patient not found for email: " + email);
-        return patientService.patientToDto(patient);
+        if (patient == null){
+            log.info("Patient not found for email: {}" , email);
+            return ResponseEntity.ok(null);
+        }
+        return ResponseEntity.ok(patientService.patientToProfileDto(patient));
     }
 
 

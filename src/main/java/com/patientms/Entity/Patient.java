@@ -59,12 +59,7 @@ public class Patient {
         this.updatedAt = LocalDateTime.now();
     }
 
-    @OneToMany(
-            mappedBy = "patient",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private List<MedicalRecord> medicalRecords = new ArrayList<>();
+    private List<String> medicalRecordIds = new ArrayList<>();
 
 
     @PreUpdate

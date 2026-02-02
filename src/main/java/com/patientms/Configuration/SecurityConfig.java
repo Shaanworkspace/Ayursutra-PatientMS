@@ -30,6 +30,7 @@ public class SecurityConfig {
 			"http://127.0.0.1:3000"
 	);
 
+
 	private final JwtAuthenticationFilter jwtAuthFilter;
 
 	@Bean

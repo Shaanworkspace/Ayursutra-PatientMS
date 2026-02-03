@@ -192,7 +192,7 @@ public class MedicalRecordService {
         Patient patient = patientRepository.findByUserId(dto.getPatientId());
         if(patient==null){
             log.error("Patient not found with id : {}",dto.getPatientId());
-            throw new RuntimeException("No Patient");
+            return false;
         }
         log.info("Patient found for appointment post : {}",patient);
         MedicalRecord record = MedicalRecord.builder()

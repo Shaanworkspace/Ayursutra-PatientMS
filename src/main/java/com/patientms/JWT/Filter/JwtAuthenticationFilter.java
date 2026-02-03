@@ -28,6 +28,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			FilterChain filterChain
 	) throws ServletException, IOException {
 
+		String origin = request.getHeader("Origin");
+		if (origin != null) {
+			response.setHeader("Access-Control-Allow-Origin", origin);
+			response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+			response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+			response.setHeader("Access-Control-Allow-Credentials", "true");
+		}
+
+		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+			response.setStatus(HttpServletResponse.SC_OK);
+			return;
+		}
+
 		log.info("Accepted By Jwt Filter of PatientMS request: {}", request.getRequestURI());
 
 		String header = request.getHeader("Authorization");

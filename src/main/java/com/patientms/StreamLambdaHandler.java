@@ -1,7 +1,7 @@
 package com.patientms;
 
 import com.amazonaws.serverless.exceptions.ContainerInitializationException;
-import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
+import com.amazonaws.serverless.proxy.model.HttpApiV2ProxyRequest; // Change yahan hai
 import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
 import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -12,12 +12,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class StreamLambdaHandler implements RequestStreamHandler {
-	private static SpringBootLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse> handler;
+	// Generic types ko HttpApiV2ProxyRequest par set kiya hai
+	private static SpringBootLambdaContainerHandler<HttpApiV2ProxyRequest, AwsProxyResponse> handler;
 
 	static {
 		try {
-			// Ye line Spring Boot ko load karti hai
-			handler = SpringBootLambdaContainerHandler.getAwsProxyHandler(PatientMsApplication.class);
+			// Function URL ke liye 'getHttpApiV2ProxyHandler' use karna zaruri hai
+			handler = SpringBootLambdaContainerHandler.getHttpApiV2ProxyHandler(PatientMsApplication.class);
 		} catch (ContainerInitializationException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Could not initialize Spring Boot application", e);

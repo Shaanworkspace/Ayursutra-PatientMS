@@ -39,5 +39,5 @@ jobs:
       - name: Update Lambda Function
         run: |
           aws lambda update-function-code \
-            --function-name patient-service-lambda \
+            --function-name patientMS \
             --image-uri ${{ steps.login-ecr.outputs.registry }}/patient-service:latest

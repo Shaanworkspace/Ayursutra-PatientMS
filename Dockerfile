@@ -11,6 +11,4 @@ WORKDIR /var/task
 
 # JAR ko copy karo. Lambda mein path '${LAMBDA_TASK_ROOT}/lib/' hona chahiye
 COPY --from=builder /app/target/*.jar ${LAMBDA_TASK_ROOT}/lib/
-
-# ENTRYPOINT ki jagah CMD use hoga jo aapke StreamLambdaHandler ko point karega
-CMD [ "com.patientms.AWS.StreamLambdaHandler::handleRequest" ]
+CMD [ "com.patientms.StreamLambdaHandler::handleRequest" ]

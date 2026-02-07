@@ -25,6 +25,8 @@ public class SecurityConfig {
 	private static final List<String> ALLOWED_ORIGINS = Arrays.asList(
 			"https://ayursutra-frontend.netlify.app",
 			"http://localhost:5173",
+			"https://ayursutra.me",
+			"https://www.ayursutra.me",
 			"http://localhost:3000",
 			"http://127.0.0.1:5173",
 			"http://127.0.0.1:3000"

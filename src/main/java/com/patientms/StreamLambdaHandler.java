@@ -12,12 +12,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class StreamLambdaHandler implements RequestStreamHandler {
-	// Generic types ko HttpApiV2ProxyRequest par set kiya hai
 	private static SpringBootLambdaContainerHandler<HttpApiV2ProxyRequest, AwsProxyResponse> handler;
 
 	static {
 		try {
-			// Function URL ke liye 'getHttpApiV2ProxyHandler' use karna zaruri hai
 			handler = SpringBootLambdaContainerHandler.getHttpApiV2ProxyHandler(PatientMsApplication.class);
 		} catch (ContainerInitializationException e) {
 			e.printStackTrace();

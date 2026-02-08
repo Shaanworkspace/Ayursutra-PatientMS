@@ -1,13 +1,13 @@
 package com.patientms.DTO.Response;
 
 
-import com.patientms.ENUM.Status;
 import com.patientms.ENUM.TherapistDecisionStatus;
 import com.patientms.ENUM.TherapyPlanStatus;
 import com.patientms.ENUM.TherapyType;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,10 +17,11 @@ import java.time.LocalDate;
 public class TherapyPlanDTO {
 	private String therapyPlanId;
 
-	private TherapyType therapyType;
+	private List<TherapyType> therapies;
 
-	private int totalSessions;
-	private int completedSessions;
+
+	private int totalTherapySessions;
+	private int completedTherapySessions;
 
 	private int sessionDurationMinutes;
 	private String frequency;
@@ -28,8 +29,6 @@ public class TherapyPlanDTO {
 	private TherapyPlanStatus status;
 
 	private LocalDate startDate;
-
-
 	private String therapistId;
 	private String therapistName;
 

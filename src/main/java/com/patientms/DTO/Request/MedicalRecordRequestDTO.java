@@ -1,12 +1,13 @@
 package com.patientms.DTO.Request;
 
+import com.patientms.ENUM.MedicalRecordStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor
@@ -19,11 +20,12 @@ public class MedicalRecordRequestDTO {
     private String therapistName;
     private String therapistId;
     private String prescribedTreatment;
+    private LocalTime appointmentTime;
     private LocalDate visitDate;     // Preferred appointment date & time
     private String symptoms;             // Description of symptoms or reason for visit
     private String allergies;            // Known allergies (if any)
-    private String medications;          // Current medications being taken
-    private String followUpRequired;     // Yes/No/Maybe - if patient needs follow-up
-
+    private String medications;
+    private String followUpRequired;
+    private MedicalRecordStatus sessionMedicalRecordStatus;
     private boolean needTherapy;
 }

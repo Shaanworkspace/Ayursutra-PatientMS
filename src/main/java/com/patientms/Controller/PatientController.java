@@ -80,7 +80,6 @@ public class PatientController {
         return ResponseEntity.ok(patientService.patientToProfileDto(patient));
     }
 
-
     /** Get patient by phone */
     @GetMapping("/phone/{phone}")
     public Patient getPatientByPhone(@PathVariable String phone) {

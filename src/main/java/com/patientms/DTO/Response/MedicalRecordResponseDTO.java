@@ -1,14 +1,14 @@
 package com.patientms.DTO.Response;
 
-import com.patientms.ENUM.Status;
-import com.patientms.ENUM.TherapyType;
+import com.patientms.ENUM.MedicalRecordStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor
@@ -22,8 +22,9 @@ public class MedicalRecordResponseDTO {
     private String doctorId;
     private String doctorName;
     private LocalDate visitDate;
-    private LocalDate createdDate;
-
+    private LocalTime appointmentTime;
+    private LocalDateTime createdDateTime;
+    private LocalDateTime updatedDateTime;
     private String symptoms;
     private String prescribedTreatment;
 
@@ -31,6 +32,6 @@ public class MedicalRecordResponseDTO {
     private String followUpRequired;
     private boolean needTherapy;
     private TherapyPlanDTO therapistPlans;
-    private Status sessionStatus;
+    private MedicalRecordStatus sessionMedicalRecordStatus;
     private boolean approvedByTherapist;
 }

@@ -1,11 +1,10 @@
 package com.patientms.Service;
 
-import com.patientms.Client.DoctorClient;
 import com.patientms.Client.TherapistClient;
 import com.patientms.DTO.Request.MedicalRecordRequestDTO;
-import com.patientms.DTO.Request.MedicalRecordUpdateRequest;
 import com.patientms.DTO.Response.MedicalRecordResponseDTO;
 import com.patientms.DTO.Response.TherapyPlanDTO;
+import com.patientms.ENUM.MedicalRecordStatus;
 import com.patientms.Entity.MedicalRecord;
 import com.patientms.Entity.Patient;
 import com.patientms.Repository.MedicalRecordRepository;
@@ -28,13 +27,18 @@ public class MedicalRecordService {
     private final TherapistClient therapistClient;
 
 
-    public boolean updateMedicalRecord(String recordId, MedicalRecordUpdateRequest therapyUpdateRequest) {
+    public boolean updateMedicalRecord(String recordId, MedicalRecordRequestDTO recordRequestDTO) {
         MedicalRecord record = medicalRecordRepository.findById(recordId).orElse(null);
         if(record == null){
             log.warn("No medical record exist with medical id : {}",recordId);
             return false;
         }
-        if(therapyUpdateRequest.getNeedTherapy()!=null) record.setNeedTherapy(therapyUpdateRequest.getNeedTherapy());
+        if(recordRequestDTO.isNeedTherapy()) record.setNeedTherapy(true);
+
+        if(recordRequestDTO.getSessionMedicalRecordStatus() != null) {
+            log.info("Medical Record id : {}, Status Updated to : {} ",recordId,record.getSessionMedicalRecordStatus());
+            record.setSessionMedicalRecordStatus(recordRequestDTO.getSessionMedicalRecordStatus());
+        }
         medicalRecordRepository.save(record);
         return true;
     }
@@ -91,11 +95,16 @@ public class MedicalRecordService {
                 .patientName(patient.getName())
                 .patientId(patient.getUserId())
                 .doctorId(record.getDoctorId())
-                .doctorName(record.getDoctorName())
                 .visitDate(record.getVisitDate())
-                .createdDate(record.getCreatedDate())
+                .appointmentTime(record.getAppointmentTime())
+                .updatedDateTime(record.getUpdatedDateTime())
+                .doctorName(record.getDoctorName())
+                .medications(record.getMedications())
+                .visitDate(record.getVisitDate())
+                .createdDateTime(record.getCreatedDateTime())
                 .symptoms(record.getSymptoms())
                 .prescribedTreatment(record.getPrescribedTreatment())
+                .sessionMedicalRecordStatus(record.getSessionMedicalRecordStatus())
                 .needTherapy(record.isNeedTherapy())
                 .build();
     }
@@ -104,16 +113,13 @@ public class MedicalRecordService {
     @Transactional
     public MedicalRecord updateByTherapist(
             String recordId,
-            MedicalRecordUpdateRequest req
+            MedicalRecordRequestDTO req
     ) {
         MedicalRecord record = medicalRecordRepository
                 .findById(recordId)
                 .orElseThrow(() -> new IllegalArgumentException("Record not found"));
 
-        if (req.getNeedTherapy() != null) {
-            record.setNeedTherapy(req.getNeedTherapy());
-        }
-
+        record.setNeedTherapy(req.isNeedTherapy());
         log.info("Updated medical record by therapist going to save : {}",record);
         return medicalRecordRepository.save(record);
     }
@@ -148,6 +154,10 @@ public class MedicalRecordService {
             record.setVisitDate(req.getVisitDate());
         }
 
+        if (req.getAppointmentTime() != null) {
+            record.setAppointmentTime(req.getAppointmentTime());
+        }
+
         return medicalRecordRepository.save(record);
     }
 
@@ -165,15 +175,21 @@ public class MedicalRecordService {
         if (dto.getSymptoms() != null)
             record.setSymptoms(dto.getSymptoms());
 
-
         if (dto.getPrescribedTreatment() != null)
             record.setPrescribedTreatment(dto.getPrescribedTreatment());
 
-        record.setNeedTherapy(dto.isNeedTherapy());
-
-
+        if(dto.isNeedTherapy()){
+            record.setNeedTherapy(true);
+            record.setSessionMedicalRecordStatus(MedicalRecordStatus.THERAPY_RECOMMENDED);
+        }else{
+            record.setSessionMedicalRecordStatus(dto.getSessionMedicalRecordStatus());
+        }
         if (dto.getVisitDate() != null)
             record.setVisitDate(dto.getVisitDate());
+        if (dto.getMedications() != null)
+            record.setMedications(dto.getMedications());
+        if (dto.getAppointmentTime() != null)
+            record.setAppointmentTime(dto.getAppointmentTime());
 
         MedicalRecord saved = medicalRecordRepository.save(record);
         log.info("MedicalRecord updated successfully: {}", saved.getMedicalRecordId());
@@ -200,7 +216,11 @@ public class MedicalRecordService {
                 .doctorName(dto.getDoctorName())
                 .symptoms(dto.getSymptoms())
                 .patientId(patient.getUserId())
+                .visitDate(dto.getVisitDate())
+                .appointmentTime(dto.getAppointmentTime())
+                .sessionMedicalRecordStatus(MedicalRecordStatus.CREATED)
                 .build();
+
 
         log.info("Medical Record Formed");
 

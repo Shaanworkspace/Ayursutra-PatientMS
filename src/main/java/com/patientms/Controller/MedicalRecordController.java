@@ -1,7 +1,6 @@
 package com.patientms.Controller;
 
 import com.patientms.DTO.Request.MedicalRecordRequestDTO;
-import com.patientms.DTO.Request.MedicalRecordUpdateRequest;
 import com.patientms.DTO.Response.MedicalRecordResponseDTO;
 import com.patientms.Entity.MedicalRecord;
 import com.patientms.Repository.MedicalRecordRepository;
@@ -24,9 +23,7 @@ public class MedicalRecordController {
 	private final MedicalRecordService medicalRecordService;
 	private final MedicalRecordRepository medicalRecordRepository;
 
-	// ======================================
-	//              GET METHODS
-	// ======================================
+	//GET METHODS
 	@GetMapping("/health")
 	public ResponseEntity<String> health() {
 		return ResponseEntity.ok("Medical SERVICE UP");
@@ -118,7 +115,7 @@ public class MedicalRecordController {
 	@PutMapping("/{recordId}/therapist")
 	public ResponseEntity<Boolean> updateTherapies(
 			@PathVariable String recordId,
-			@RequestBody MedicalRecordUpdateRequest req) {
+			@RequestBody MedicalRecordRequestDTO req) {
 
 		boolean updated = medicalRecordService.updateMedicalRecord(recordId,
 				req
@@ -127,10 +124,14 @@ public class MedicalRecordController {
 		return ResponseEntity.notFound().build();
 	}
 
+
+	/*
+	 * In Use to assign therapize to patient by therapist in :  Ayursutra-frontend/src/pages/Therapists/Page/TherapistSessionDetail.jsx
+	 */
 	@PutMapping("/{recordId}/therapist-update")
 	public ResponseEntity<?> therapistUpdateRecord(
 			@PathVariable String recordId,
-			@RequestBody MedicalRecordUpdateRequest req
+			@RequestBody MedicalRecordRequestDTO req
 	) {
 		log.info("Updating medical record by therapist with record id:{}, and re:{}", recordId, req);
 		MedicalRecord updated =
@@ -169,5 +170,10 @@ public class MedicalRecordController {
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("!!!!  " + e.getMessage());
 		}
+	}
+
+	@DeleteMapping
+	public void deleteAllRecord() {
+		medicalRecordRepository.deleteAll();
 	}
 }
